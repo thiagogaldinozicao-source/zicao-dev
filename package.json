@@ -1,9 +1,22 @@
 {
-  "name": "zicao-dev",
-  "version": "1.0.0",
-  "description": "zicao.dev — IA de programação com motor cascata Claude-first",
-  "private": true,
-  "engines": {
-    "node": ">=18"
-  }
+  "version": 2,
+  "functions": {
+    "api/chat.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/public/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ]
 }
