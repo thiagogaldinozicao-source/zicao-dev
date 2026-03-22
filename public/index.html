@@ -1,1 +1,1748 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>zicao.dev — IA para Programar Tudo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   zicao.dev — Design System
+═══════════════════════════════════════ */
+:root {
+  --void: #060606;
+  --deep: #090909;
+  --base: #0e0e0e;
+  --lift: #141414;
+  --card: #181818;
+  --raise: #1e1e1e;
+  --rim: #242424;
+  --border: #2a2a2a;
+  --muted: #333333;
 
+  --neon: #e8b735;
+  --neon-dim: rgba(232,183,53,0.12);
+  --neon-glow: 0 0 20px rgba(232,183,53,0.3);
+  --lime: #e8b735;
+  --lime-dim: rgba(245,200,66,0.1);
+  --violet: #888888;
+  --violet-dim: rgba(136,136,136,0.08);
+  --amber: #e8b735;
+  --rose: #f43f5e;
+  --emerald: #c8a030;
+  --sky: #e8b735;
+
+  --text-1: #f0f0f0;
+  --text-2: #909090;
+  --text-3: #555555;
+  --text-4: #333333;
+
+  --ff: 'Space Grotesk', sans-serif;
+  --mono: 'Fira Code', monospace;
+
+  --r: 10px;
+  --r-sm: 6px;
+  --r-lg: 14px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--void);
+  color: var(--text-1);
+  font-family: var(--ff);
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* Ambient atmosphere */
+#atmosphere {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 10% 5%, rgba(232,183,53,0.03) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 35% at 90% 90%, rgba(232,183,53,0.02) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(163,230,53,0.02) 0%, transparent 60%);
+}
+
+/* Grid lines background */
+#grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.025;
+  background-image:
+    linear-gradient(rgba(232,183,53,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, var(--neon) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ═══════ LAYOUT ═══════ */
+#app {
+  position: relative; z-index: 1;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 48px 1fr;
+  grid-template-columns: 56px 220px 1fr 300px;
+  grid-template-areas:
+    "topbar topbar topbar topbar"
+    "iconbar sidebar editor rightpanel";
+}
+
+/* ═══════ TOPBAR ═══════ */
+#topbar {
+  grid-area: topbar;
+  background: var(--base);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 0;
+  z-index: 200;
+}
+
+.logo-wrap {
+  display: flex; align-items: center; gap: 10px;
+  padding-right: 18px;
+  border-right: 1px solid var(--border);
+  margin-right: 14px;
+  cursor: pointer;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, #e8b735, #b8941a);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  box-shadow: var(--neon-glow);
+  animation: logoPulse 4s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%,100%{ box-shadow: 0 0 15px rgba(232,183,53,0.3); }
+  50%{ box-shadow: 0 0 30px rgba(232,183,53,0.5), 0 0 60px rgba(232,183,53,0.15); }
+}
+.logo-text {
+  font-size: 16px; font-weight: 700; letter-spacing: 0.1em;
+  background: linear-gradient(90deg, #e8b735, #d4a820);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.top-tabs {
+  display: flex; gap: 2px; flex: 1;
+}
+.top-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 14px; border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 500; color: var(--text-3);
+  cursor: pointer; transition: all 0.15s;
+  border: 1px solid transparent;
+}
+.top-tab:hover { color: var(--text-2); background: var(--lift); }
+.top-tab.active {
+  color: var(--neon); background: var(--neon-dim);
+  border-color: rgba(232,183,53,0.2);
+}
+.top-tab .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--neon); box-shadow: 0 0 6px var(--neon);
+}
+
+.top-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.status-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  background: var(--lift); border: 1px solid var(--border);
+  border-radius: 20px; font-size: 11px; color: var(--text-2);
+  font-family: var(--mono);
+}
+.status-light {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--lime); box-shadow: 0 0 8px var(--lime);
+  animation: blink 3s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.top-btn {
+  background: var(--lift); border: 1px solid var(--border);
+  color: var(--text-2); font-family: var(--ff); font-size: 12px;
+  padding: 6px 14px; border-radius: var(--r-sm); cursor: pointer;
+  transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+}
+.top-btn:hover { border-color: var(--neon); color: var(--neon); background: var(--neon-dim); }
+.top-btn.primary {
+  background: linear-gradient(135deg, #e8b735, #b8941a);
+  color: var(--void); border-color: transparent; font-weight: 600;
+}
+.top-btn.primary:hover { opacity: 0.85; }
+
+/* ═══════ ICON BAR ═══════ */
+#iconbar {
+  grid-area: iconbar;
+  background: var(--base);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; padding: 10px 0; gap: 4px;
+}
+.icon-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-sm); cursor: pointer;
+  font-size: 17px; color: var(--text-3);
+  transition: all 0.15s;
+  position: relative;
+}
+.icon-btn:hover { color: var(--text-1); background: var(--lift); }
+.icon-btn.active { color: var(--neon); background: var(--neon-dim); }
+.icon-btn::after {
+  content: attr(data-tip);
+  position: absolute; left: 46px; top: 50%;
+  transform: translateY(-50%);
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text-1); font-size: 11px; font-family: var(--ff);
+  padding: 4px 8px; border-radius: 5px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+  z-index: 999;
+}
+.icon-btn:hover::after { opacity: 1; }
+
+/* ═══════ SIDEBAR ═══════ */
+#sidebar {
+  grid-area: sidebar;
+  background: var(--deep);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sb-section {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--text-4); text-transform: uppercase;
+  padding: 14px 14px 6px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px;
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  cursor: pointer; transition: all 0.15s;
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+.sb-item:hover { color: var(--text-1); background: var(--lift); }
+.sb-item.active {
+  color: var(--neon); background: var(--neon-dim);
+  border-left-color: var(--neon);
+}
+.sb-item-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.sb-item-badge {
+  margin-left: auto; font-size: 10px; font-family: var(--mono);
+  background: var(--rim); color: var(--text-3);
+  padding: 2px 7px; border-radius: 10px;
+}
+.sb-item.active .sb-item-badge { background: rgba(232,183,53,0.15); color: var(--neon); }
+
+.sb-divider { height: 1px; background: var(--border); margin: 6px 12px; }
+
+.sb-history { flex: 1; overflow-y: auto; padding-bottom: 8px; }
+.sb-history::-webkit-scrollbar { width: 3px; }
+.sb-history::-webkit-scrollbar-thumb { background: var(--border); }
+
+.hist-entry {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; cursor: pointer;
+  font-size: 11px; color: var(--text-3);
+  transition: all 0.15s; overflow: hidden;
+}
+.hist-entry:hover { color: var(--text-2); background: var(--lift); }
+.hist-entry-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-4); flex-shrink: 0; }
+.hist-entry-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sb-bottom {
+  border-top: 1px solid var(--border); padding: 10px 12px;
+}
+.model-pill {
+  background: var(--lift); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 8px 12px;
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  transition: all 0.2s;
+}
+.model-pill:hover { border-color: var(--violet); background: var(--violet-dim); }
+.model-indicator {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: conic-gradient(#e8b735, #b8941a, #e8b735, #b8941a);
+  box-shadow: 0 0 8px rgba(232,183,53,0.4);
+  flex-shrink: 0; animation: spin 4s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.model-info { flex: 1; }
+.model-name { font-size: 11px; font-weight: 600; color: var(--text-1); }
+.model-detail { font-size: 10px; color: var(--text-3); font-family: var(--mono); }
+
+/* ═══════ EDITOR / MAIN AREA ═══════ */
+#editor {
+  grid-area: editor;
+  background: var(--deep);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* File tabs */
+#file-tabs {
+  display: flex; align-items: center;
+  background: var(--base); border-bottom: 1px solid var(--border);
+  padding: 0 12px; gap: 1px; height: 35px; flex-shrink: 0;
+  overflow-x: auto;
+}
+#file-tabs::-webkit-scrollbar { height: 2px; }
+#file-tabs::-webkit-scrollbar-thumb { background: var(--border); }
+
+.file-tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 12px; font-size: 12px; font-weight: 500;
+  color: var(--text-3); cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap; transition: all 0.15s;
+  height: 100%;
+}
+.file-tab:hover { color: var(--text-2); }
+.file-tab.active { color: var(--neon); border-bottom-color: var(--neon); background: rgba(232,183,53,0.04); }
+.file-tab-ext { font-size: 9px; font-family: var(--mono); opacity: 0.6; }
+.file-tab-close { font-size: 9px; color: var(--text-4); padding: 2px 4px; border-radius: 3px; transition: all 0.15s; }
+.file-tab-close:hover { color: var(--rose); background: rgba(244,63,94,0.1); }
+.add-tab { color: var(--text-4); font-size: 18px; cursor: pointer; padding: 0 6px; border-radius: 4px; transition: all 0.15s; }
+.add-tab:hover { color: var(--neon); background: var(--lift); }
+
+/* Messages area */
+#messages {
+  flex: 1; overflow-y: auto;
+  padding: 20px 24px; display: flex; flex-direction: column; gap: 2px;
+  scroll-behavior: smooth;
+}
+#messages::-webkit-scrollbar { width: 4px; }
+#messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Welcome */
+.welcome {
+  margin: auto; text-align: center; padding: 32px 20px;
+  animation: fadeUp 0.6s ease;
+  max-width: 600px;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+.welcome-emblem {
+  width: 72px; height: 72px; margin: 0 auto 22px;
+  background: linear-gradient(135deg, #e8b735, #b8941a, #e8b735);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px;
+  box-shadow: 0 0 40px rgba(232,183,53,0.25), 0 0 80px rgba(196,149,32,0.1);
+  animation: emblemFloat 4s ease-in-out infinite;
+}
+@keyframes emblemFloat {
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  33%{transform:translateY(-6px) rotate(1deg)}
+  66%{transform:translateY(-3px) rotate(-1deg)}
+}
+
+.welcome-title {
+  font-size: 30px; font-weight: 700; letter-spacing: -0.03em;
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, #e8b735 0%, #b8941a 50%, #e8b735 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.welcome-sub {
+  font-size: 14px; color: var(--text-2); margin-bottom: 28px; line-height: 1.65;
+}
+.welcome-sub em { color: var(--lime); font-style: normal; font-weight: 600; }
+
+.mode-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px;
+}
+.mode-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 12px 10px; cursor: pointer;
+  transition: all 0.2s; text-align: left;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.mode-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.mode-card:hover .mc-icon-wrap { box-shadow: 0 0 16px currentColor; }
+.mc-icon-wrap { font-size: 18px; margin-bottom: 4px; }
+.mc-title { font-size: 12px; font-weight: 600; color: var(--text-1); }
+.mc-desc { font-size: 10px; color: var(--text-3); line-height: 1.4; }
+
+/* Hover colors */
+.mc-web:hover { border-color: var(--sky); background: rgba(56,189,248,0.06); }
+.mc-app:hover { border-color: var(--violet); background: var(--violet-dim); }
+.mc-script:hover { border-color: var(--lime); background: var(--lime-dim); }
+.mc-api:hover { border-color: var(--neon); background: var(--neon-dim); }
+.mc-planilha:hover { border-color: var(--emerald); background: rgba(16,185,129,0.06); }
+.mc-debug:hover { border-color: var(--rose); background: rgba(244,63,94,0.06); }
+
+.quick-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+}
+.chip {
+  background: var(--lift); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 11px; color: var(--text-2); cursor: pointer;
+  transition: all 0.15s;
+}
+.chip:hover { border-color: var(--neon); color: var(--neon); background: var(--neon-dim); }
+
+/* Messages */
+.msg {
+  display: flex; gap: 12px; padding: 10px 0;
+  animation: fadeUp 0.3s ease;
+  position: relative;
+}
+.msg:hover .msg-acts { opacity: 1; }
+
+.msg-av {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0; margin-top: 2px;
+}
+.msg.ai .msg-av {
+  background: linear-gradient(135deg, #e8b735, #b8941a);
+  box-shadow: 0 0 12px rgba(232,183,53,0.3);
+}
+.msg.user .msg-av { background: var(--raise); border: 1px solid var(--border); }
+
+.msg-body-wrap { flex: 1; min-width: 0; }
+.msg-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.msg-name { font-size: 12px; font-weight: 700; }
+.msg.ai .msg-name { color: var(--neon); }
+.msg.user .msg-name { color: var(--text-2); }
+.msg-ts { font-size: 10px; color: var(--text-4); font-family: var(--mono); }
+.msg-mode-tag {
+  font-size: 9px; font-family: var(--mono);
+  padding: 1px 6px; border-radius: 4px;
+  background: var(--raise); color: var(--text-3); border: 1px solid var(--border);
+}
+
+.msg-text { font-size: 13px; line-height: 1.75; color: var(--text-1); }
+
+.msg-acts {
+  position: absolute; top: 10px; right: 0;
+  display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s;
+}
+.act-btn {
+  background: var(--raise); border: 1px solid var(--border);
+  color: var(--text-3); font-size: 10px; font-family: var(--ff);
+  padding: 3px 8px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+}
+.act-btn:hover { color: var(--text-1); border-color: var(--muted); }
+
+/* Code blocks */
+.code-wrap {
+  margin: 10px 0; border-radius: var(--r);
+  overflow: hidden; border: 1px solid var(--border);
+  background: var(--void);
+}
+.code-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 14px;
+  background: var(--lift);
+  border-bottom: 1px solid var(--border);
+}
+.code-lang-tag {
+  font-size: 10px; font-weight: 700; font-family: var(--mono);
+  color: var(--neon); text-transform: uppercase; letter-spacing: 0.1em;
+  display: flex; align-items: center; gap: 6px;
+}
+.lang-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 6px var(--neon); }
+.code-btns { display: flex; gap: 5px; }
+.code-btn {
+  background: var(--raise); border: 1px solid var(--border);
+  color: var(--text-3); font-size: 10px; font-family: var(--mono);
+  padding: 3px 10px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+}
+.code-btn:hover { color: var(--lime); border-color: var(--lime); }
+.code-btn.saved { color: var(--lime); border-color: var(--lime); }
+
+.code-lines {
+  padding: 14px 16px; overflow-x: auto;
+  font-family: var(--mono); font-size: 12px; line-height: 1.7;
+  color: #9ab0d0;
+  counter-reset: line;
+}
+.code-lines::-webkit-scrollbar { height: 4px; }
+.code-lines::-webkit-scrollbar-thumb { background: var(--border); }
+.code-line { display: flex; gap: 16px; }
+.ln { color: var(--text-4); user-select: none; min-width: 24px; text-align: right; flex-shrink: 0; }
+
+/* Syntax tokens */
+.t-kw { color: #c792ea; font-style: italic; }
+.t-fn { color: #82aaff; }
+.t-str { color: #c3e88d; }
+.t-num { color: #f78c6c; }
+.t-cmt { color: #546e7a; font-style: italic; }
+.t-cls { color: #ffcb6b; }
+.t-prop { color: #89ddff; }
+.t-op { color: #89ddff; }
+.t-bool { color: #ff5370; }
+
+/* Preview panel inside msg */
+.preview-wrap {
+  margin: 10px 0; border-radius: var(--r);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.preview-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 14px; background: var(--lift); border-bottom: 1px solid var(--border);
+}
+.preview-title { font-size: 11px; color: var(--text-2); font-family: var(--mono); display: flex; align-items: center; gap: 6px; }
+.preview-frame { width: 100%; height: 220px; border: none; background: white; }
+
+/* Thinking */
+.thinking {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; font-size: 12px; color: var(--text-3); font-family: var(--mono);
+}
+.think-dots { display: flex; gap: 5px; }
+.think-dots span {
+  width: 7px; height: 7px; border-radius: 50%;
+  animation: thinkBounce 1.4s ease-in-out infinite;
+}
+.think-dots span:nth-child(1) { background: var(--neon); }
+.think-dots span:nth-child(2) { background: var(--violet); animation-delay: 0.2s; }
+.think-dots span:nth-child(3) { background: var(--lime); animation-delay: 0.4s; }
+@keyframes thinkBounce {
+  0%,80%,100%{transform:translateY(0) scale(0.6);opacity:0.3}
+  40%{transform:translateY(-5px) scale(1);opacity:1}
+}
+
+/* ═══════ INPUT AREA ═══════ */
+#input-zone {
+  border-top: 1px solid var(--border);
+  background: var(--base);
+  padding: 10px 16px 12px;
+  flex-shrink: 0;
+}
+
+.inp-toolbar {
+  display: flex; align-items: center; gap: 5px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.t-chip {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-3); font-size: 10px; font-family: var(--ff);
+  padding: 4px 10px; border-radius: 20px; cursor: pointer;
+  transition: all 0.15s; display: flex; align-items: center; gap: 4px;
+}
+.t-chip:hover { color: var(--text-2); border-color: var(--muted); background: var(--lift); }
+.t-chip.mode-active {
+  color: var(--lime); border-color: rgba(163,230,53,0.3); background: var(--lime-dim);
+}
+
+.inp-row {
+  display: flex; align-items: flex-end; gap: 8px;
+  background: var(--lift); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 12px 10px 16px;
+  transition: all 0.2s;
+}
+.inp-row:focus-within {
+  border-color: var(--neon);
+  box-shadow: 0 0 0 3px rgba(232,183,53,0.08), 0 0 20px rgba(34,211,238,0.05);
+}
+
+#txt {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--text-1); font-family: var(--ff); font-size: 13px;
+  resize: none; min-height: 22px; max-height: 150px; line-height: 1.6; padding: 2px 0;
+}
+#txt::placeholder { color: var(--text-4); }
+
+.inp-side { display: flex; gap: 5px; align-items: flex-end; }
+.inp-icon-btn {
+  background: transparent; border: none;
+  color: var(--text-4); font-size: 15px; cursor: pointer;
+  padding: 5px; border-radius: 5px; transition: all 0.15s; line-height: 1;
+}
+.inp-icon-btn:hover { color: var(--text-2); background: var(--raise); }
+
+#send {
+  background: linear-gradient(135deg, #e8b735, #b8941a);
+  border: none; border-radius: 9px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(232,183,53,0.25);
+  transition: opacity 0.15s, transform 0.15s;
+}
+#send:hover { opacity: 0.85; transform: scale(1.05); }
+#send:active { transform: scale(0.95); }
+#send:disabled { opacity: 0.25; cursor: default; transform: none; box-shadow: none; }
+
+.inp-footer {
+  display: flex; justify-content: space-between; align-items: center; margin-top: 6px;
+}
+.inp-hint { font-size: 10px; color: var(--text-4); font-family: var(--mono); }
+.char-c { font-size: 10px; color: var(--text-4); font-family: var(--mono); }
+
+/* ═══════ RIGHT PANEL ═══════ */
+#rightpanel {
+  grid-area: rightpanel;
+  background: var(--deep);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.rp-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  background: var(--base);
+}
+.rp-tab {
+  flex: 1; text-align: center;
+  padding: 10px 0; font-size: 11px; font-weight: 600;
+  color: var(--text-4); cursor: pointer; transition: all 0.15s;
+  border-bottom: 2px solid transparent;
+}
+.rp-tab:hover { color: var(--text-2); }
+.rp-tab.active { color: var(--neon); border-bottom-color: var(--neon); background: rgba(232,183,53,0.03); }
+
+.rp-body { flex: 1; overflow-y: auto; padding: 14px; }
+.rp-body::-webkit-scrollbar { width: 3px; }
+.rp-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* Stats */
+.stat-block {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 10px 14px; margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.stat-key { font-size: 11px; color: var(--text-2); }
+.stat-val { font-size: 13px; font-weight: 700; font-family: var(--mono); color: var(--neon); }
+
+.bar-wrap { margin-bottom: 12px; }
+.bar-head { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 10px; color: var(--text-3); font-family: var(--mono); }
+.bar-bg { height: 4px; background: var(--raise); border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; background: linear-gradient(90deg, #b8941a, #e8b735); }
+
+.snip-entry {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 10px; margin-bottom: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+.snip-entry:hover { border-color: var(--muted); transform: translateX(2px); }
+.snip-lang { font-size: 10px; font-family: var(--mono); color: var(--neon); background: var(--neon-dim); padding: 1px 6px; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
+.snip-name { font-size: 11px; font-weight: 600; color: var(--text-1); margin-bottom: 3px; }
+.snip-preview { font-size: 10px; font-family: var(--mono); color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Section headers */
+.section-head {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+  color: var(--text-4); text-transform: uppercase;
+  margin: 12px 0 8px; padding-bottom: 5px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 10px 16px;
+  font-size: 12px; color: var(--text-1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  z-index: 9999; display: flex; align-items: center; gap: 8px;
+  animation: toastIn 0.3s ease;
+  max-width: 300px;
+}
+@keyframes toastIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.toast-icon { font-size: 15px; flex-shrink: 0; }
+
+/* Inline formatting */
+.msg-text strong { color: var(--neon); font-weight: 600; }
+.msg-text em { color: var(--violet); font-style: italic; }
+.msg-text .ic { font-family: var(--mono); font-size: 11px; background: var(--lift); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; color: #f78c6c; }
+
+/* Notification dot */
+.notif-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--rose);
+  position: absolute; top: 4px; right: 4px;
+  box-shadow: 0 0 6px var(--rose);
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  #app { grid-template-columns: 56px 1fr 260px; grid-template-areas: "topbar topbar topbar" "iconbar editor rightpanel"; }
+  #sidebar { display: none; }
+}
+@media (max-width: 680px) {
+  #app { grid-template-columns: 1fr; grid-template-areas: "topbar" "editor"; }
+  #iconbar, #sidebar, #rightpanel { display: none; }
+  #topbar { padding: 0 10px; gap: 6px; }
+  .tb-tabs, .top-right .top-btn:not(.primary) { display: none; }
+  #input-zone { padding: 8px 10px 12px; }
+}
+</style>
+</head>
+<body>
+<div id="atmosphere"></div>
+<div id="grid-bg"></div>
+
+<div id="app">
+
+<!-- ══════════ TOPBAR ══════════ -->
+<div id="topbar">
+  <div class="logo-wrap">
+    <div class="logo-mark">◈</div>
+    <span class="logo-text">zicao.dev</span>
+  </div>
+  <div class="top-tabs" id="chat-tab-bar">
+    <div class="top-tab active" data-id="0">
+      <div class="dot"></div>
+      <span>Chat 1</span>
+    </div>
+    <div class="top-tab" style="color:var(--text-4);font-size:18px;padding:4px 8px;cursor:pointer" onclick="newChat()" title="Nova aba">+</div>
+  </div>
+  <div class="top-right">
+    <div class="status-badge">
+      <div class="status-light"></div>
+      <span id="model-label-top">claude sonnet · online</span>
+    </div>
+    <button class="top-btn" onclick="clearAll()">✕ Limpar</button>
+    <button class="top-btn" onclick="exportMd()">⬇ Exportar</button>
+    <button class="top-btn" onclick="showStatusModal()" style="border-color:#4ade80;color:#4ade80">● Status</button>
+    <button class="top-btn primary" onclick="deployProject()">⚡ Deploy</button>
+  </div>
+</div>
+
+<!-- ══════════ ICON BAR ══════════ -->
+<div id="iconbar">
+  <div class="icon-btn active" data-tip="Chat IA" onclick="setView('chat',this)">💬</div>
+  <div class="icon-btn" data-tip="Gerar Código" onclick="setView('code',this)">⌨</div>
+  <div class="icon-btn" data-tip="Preview Web" onclick="setView('preview',this)">🌐</div>
+  <div class="icon-btn" data-tip="Snippets" onclick="setView('snippets',this)">📁</div>
+  <div class="icon-btn" data-tip="Debug IA" onclick="setView('debug',this)">🐛</div>
+  <div style="flex:1"></div>
+  <div class="icon-btn" data-tip="Limpar chat" onclick="clearAll()" style="font-size:14px">🗑</div>
+  <div class="icon-btn" data-tip="Configurações" onclick="toast('⚙ Configurações em breve!')">⚙</div>
+</div>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<div id="sidebar">
+  <div class="sb-section">Modos</div>
+  <div class="sb-item active" onclick="setMode('free',this)"><span class="sb-item-icon">💬</span>Chat Livre<span class="sb-item-badge">geral</span></div>
+  <div class="sb-item" onclick="setMode('web',this)"><span class="sb-item-icon">🌐</span>Site / Web<span class="sb-item-badge">html</span></div>
+  <div class="sb-item" onclick="setMode('app',this)"><span class="sb-item-icon">📱</span>App Mobile<span class="sb-item-badge">react</span></div>
+  <div class="sb-item" onclick="setMode('script',this)"><span class="sb-item-icon">🐍</span>Script Python<span class="sb-item-badge">py</span></div>
+  <div class="sb-item" onclick="setMode('api',this)"><span class="sb-item-icon">🚀</span>API REST<span class="sb-item-badge">node</span></div>
+  <div class="sb-item" onclick="setMode('planilha',this)"><span class="sb-item-icon">📊</span>Planilha / Excel<span class="sb-item-badge">xlsx</span></div>
+  <div class="sb-item" onclick="setMode('sql',this)"><span class="sb-item-icon">🗄️</span>Banco SQL<span class="sb-item-badge">sql</span></div>
+  <div class="sb-item" onclick="setMode('debug',this)"><span class="sb-item-icon">🐛</span>Debug & Fix<span class="sb-item-badge">fix</span></div>
+  <div class="sb-item" onclick="setMode('review',this)"><span class="sb-item-icon">🔍</span>Code Review<span class="sb-item-badge">rev</span></div>
+  <div class="sb-item" onclick="setMode('docs',this)"><span class="sb-item-icon">📝</span>Documentação<span class="sb-item-badge">doc</span></div>
+  <div class="sb-item" onclick="setMode('regex',this)"><span class="sb-item-icon">🔎</span>Regex Helper<span class="sb-item-badge">rx</span></div>
+  <div class="sb-item" onclick="setMode('git',this)"><span class="sb-item-icon">🌿</span>Git / Versionamento<span class="sb-item-badge">git</span></div>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section">Histórico</div>
+  <div class="sb-history" id="hist-list">
+    <div style="padding:8px 14px;font-size:11px;color:var(--text-4)">Nenhuma conversa</div>
+  </div>
+
+  <div class="sb-bottom">
+    <div class="model-pill">
+      <div class="model-indicator"></div>
+      <div class="model-info">
+        <div class="model-name">Claude Sonnet 4</div>
+        <div class="model-detail">Anthropic · 8k ctx</div>
+      </div>
+      <span style="color:var(--text-4);font-size:10px">▾</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ EDITOR ══════════ -->
+<div id="editor">
+  <div id="file-tabs">
+    <div class="file-tab active" data-id="0">
+      <span>chat-1</span><span class="file-tab-ext">.ai</span>
+      <span class="file-tab-close" onclick="closeFileTab(event,0)">✕</span>
+    </div>
+    <div class="add-tab" onclick="newChat()">+</div>
+  </div>
+  <div id="messages">
+    <div class="welcome" id="welcome-screen">
+      <div class="welcome-emblem">◈</div>
+      <div class="welcome-title">zicao.dev</div>
+      <div class="welcome-sub">
+        A IA mais completa para programar.<br>
+        Crie <em>sites</em>, <em>apps</em>, <em>APIs</em>, <em>planilhas</em> e <em>scripts</em> — tudo com linguagem natural.
+      </div>
+      <div class="mode-grid">
+        <div class="mode-card mc-web" onclick="quickMode('web','Crie um site HTML/CSS/JS moderno e responsivo com uma landing page profissional')">
+          <div class="mc-icon-wrap" style="color:var(--sky)">🌐</div>
+          <div class="mc-title">Site / Web</div>
+          <div class="mc-desc">Landing pages, portfólios, dashboards</div>
+        </div>
+        <div class="mode-card mc-app" onclick="quickMode('app','Crie um app React completo com navegação, estado global e UI moderna')">
+          <div class="mc-icon-wrap" style="color:var(--violet)">📱</div>
+          <div class="mc-title">App / React</div>
+          <div class="mc-desc">Componentes, hooks, context</div>
+        </div>
+        <div class="mode-card mc-script" onclick="quickMode('script','Crie um script Python útil com boas práticas e comentários')">
+          <div class="mc-icon-wrap" style="color:var(--lime)">🐍</div>
+          <div class="mc-title">Python / Script</div>
+          <div class="mc-desc">Automação, dados, CLI tools</div>
+        </div>
+        <div class="mode-card mc-api" onclick="quickMode('api','Crie uma API REST completa com Node.js/Express com CRUD e autenticação JWT')">
+          <div class="mc-icon-wrap" style="color:var(--neon)">🚀</div>
+          <div class="mc-title">API REST</div>
+          <div class="mc-desc">Node.js, Express, FastAPI</div>
+        </div>
+        <div class="mode-card mc-planilha" onclick="quickMode('planilha','Crie uma planilha Excel completa com fórmulas, gráficos e tabela dinâmica para controle financeiro')">
+          <div class="mc-icon-wrap" style="color:var(--emerald)">📊</div>
+          <div class="mc-title">Planilha / Excel</div>
+          <div class="mc-desc">Fórmulas, gráficos, automação</div>
+        </div>
+        <div class="mode-card mc-debug" onclick="quickMode('debug','Analise este erro e corrija:')">
+          <div class="mc-icon-wrap" style="color:var(--rose)">🐛</div>
+          <div class="mc-title">Debug & Fix</div>
+          <div class="mc-desc">Analise erros, corrija bugs</div>
+        </div>
+      </div>
+      <div class="quick-chips">
+        <div class="chip" onclick="useChip('Crie um jogo da velha em HTML/JS')">🎮 Jogo da Velha</div>
+        <div class="chip" onclick="useChip('Crie um app de lista de tarefas com localStorage')">✅ Todo App</div>
+        <div class="chip" onclick="useChip('Crie um chatbot simples em Python')">🤖 Chatbot Python</div>
+        <div class="chip" onclick="useChip('Crie uma query SQL para relatório de vendas')">📈 SQL Relatório</div>
+        <div class="chip" onclick="useChip('Crie um componente de formulário de login em React com validação')">🔒 Login Form</div>
+        <div class="chip" onclick="useChip('Explique como funciona async/await em JavaScript')">⚡ Async JS</div>
+        <div class="chip" onclick="useChip('Crie um script Python para renomear arquivos em massa')">📁 Rename Files</div>
+        <div class="chip" onclick="useChip('Crie uma API de autenticação com JWT em Node.js')">🔑 JWT Auth</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT ZONE -->
+  <div id="input-zone">
+    <div class="inp-toolbar" id="toolbar">
+      <button class="t-chip mode-active" id="mode-chip" onclick="cycleModeBtn()">
+        <span style="width:5px;height:5px;border-radius:50%;background:var(--lime);box-shadow:0 0 5px var(--lime);display:inline-block"></span>
+        <span id="mode-chip-label">Chat Livre</span>
+      </button>
+      <button class="t-chip" onclick="inject('```javascript\n\n```')">JS</button>
+      <button class="t-chip" onclick="inject('```python\n\n```')">Python</button>
+      <button class="t-chip" onclick="inject('```html\n\n```')">HTML</button>
+      <button class="t-chip" onclick="inject('```sql\n\n```')">SQL</button>
+      <button class="t-chip" onclick="inject('Erro:\n```\n\n```\nComo resolver?')">⚠ Erro</button>
+      <button class="t-chip" onclick="inject('Explique este código:\n```\n\n```')">💡 Explain</button>
+      <button class="t-chip" onclick="inject('Faça um code review deste código:\n```\n\n```')">🔍 Review</button>
+    </div>
+    <div class="inp-row">
+      <textarea id="txt" placeholder="Descreva o que quer criar, cole código, peça ajuda..." rows="1"></textarea>
+      <div class="inp-side">
+        <button class="inp-icon-btn" onclick="clearTxt()" title="Limpar">✕</button>
+        <button id="send" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+    <div class="inp-footer">
+      <span class="inp-hint">Enter → enviar &nbsp;·&nbsp; Shift+Enter → nova linha</span>
+      <span class="char-c" id="char-c">0</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ RIGHT PANEL ══════════ -->
+<div id="rightpanel">
+  <div class="rp-tabs">
+    <div class="rp-tab active" onclick="setRpTab(this,'stats')">Stats</div>
+    <div class="rp-tab" onclick="setRpTab(this,'snippets')">Snippets</div>
+    <div class="rp-tab" onclick="setRpTab(this,'tips')">Dicas</div>
+  </div>
+  <div class="rp-body" id="rp-content">
+    <!-- Stats tab -->
+    <div id="tab-stats">
+      <div class="section-head">Sessão Atual</div>
+      <div class="stat-block"><span class="stat-key">Mensagens</span><span class="stat-val" id="st-msgs">0</span></div>
+      <div class="stat-block"><span class="stat-key">Tokens (est.)</span><span class="stat-val" id="st-tokens">0</span></div>
+      <div class="stat-block"><span class="stat-key">Snippets Salvos</span><span class="stat-val" id="st-snips">0</span></div>
+      <div class="stat-block"><span class="stat-key">Modo</span><span class="stat-val" id="st-mode">Chat</span></div>
+      <div class="stat-block"><span class="stat-key">Abas</span><span class="stat-val" id="st-tabs">1</span></div>
+      <div class="bar-wrap" style="margin-top:12px">
+        <div class="bar-head"><span>Contexto</span><span id="st-ctx-pct">0%</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="ctx-bar" style="width:0%"></div></div>
+      </div>
+      <div class="section-head" style="margin-top:16px">Capacidades</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Sites HTML/CSS/JS</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Apps React/Vue</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> APIs REST (Node/Python)</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Scripts Python/Bash</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Planilhas Excel</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Banco de dados SQL</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Debug & Code Review</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Documentação técnica</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Regex & Git</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)"><span style="color:var(--lime)">✓</span> Qualquer linguagem</div>
+      </div>
+    </div>
+    <div id="tab-snippets" style="display:none">
+      <div class="section-head">Snippets Salvos</div>
+      <div id="snippets-panel">
+        <div style="text-align:center;padding:24px 0;font-size:12px;color:var(--text-4);line-height:1.7">
+          Nenhum snippet salvo.<br>Clique em 💾 em qualquer bloco de código.
+        </div>
+      </div>
+    </div>
+    <div id="tab-tips" style="display:none">
+      <div class="section-head">Dicas Rápidas</div>
+      <div style="display:flex;flex-direction:column;gap:8px" id="tips-list"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// DNA DO CLAUDE — Personalidade e comportamento base
+// Este prompt é injetado em TODAS as APIs para garantir
+// que qualquer modelo se comporte como o Claude
+// ══════════════════════════════════════════════════════════════
+const CLAUDE_DNA = `Você é a zicao.dev, uma IA de programação de alto nível criada para o projeto zicao.dev.
+Seu comportamento, estilo e qualidade são baseados no Claude da Anthropic — o melhor assistente de código do mundo.
+
+PERSONALIDADE E TOM:
+- Seja direto, confiante e preciso — vá direto ao ponto sem enrolação
+- Use linguagem natural e acessível, nunca robótica ou formal demais
+- Demonstre raciocínio: explique o "porquê" das suas escolhas, não só o "o quê"
+- Seja honesto: se algo tem limitação ou tradeoff, diga claramente
+- Adapte o nível técnico ao usuário — se ele for iniciante, explique mais; se for avançado, vá direto
+- Nunca seja condescendente nem presunçoso
+- Quando elogiar, seja genuíno e específico — nunca genérico
+
+MÉTODO DE RACIOCÍNIO (igual ao Claude):
+- Antes de responder, analise o problema com profundidade
+- Para problemas complexos, pense em voz alta: "Vamos analisar isso passo a passo..."
+- Identifique o que o usuário REALMENTE precisa, não só o que pediu
+- Se houver ambiguidade, resolva com a melhor interpretação E mencione as alternativas
+- Prefira soluções simples e elegantes a soluções complexas
+
+FORMATAÇÃO DE RESPOSTAS:
+- Para respostas curtas/conversacionais: texto corrido, sem headers desnecessários
+- Para tutoriais/explicações longas: use ## para seções, mas só quando necessário
+- Para listas: use apenas quando fizer sentido listar, não force bullet points em tudo
+- Para código: SEMPRE em blocos \`\`\`linguagem, NUNCA inline para código longo
+- Tamanho: tão longo quanto necessário, tão curto quanto possível
+
+CÓDIGO — PADRÕES DE QUALIDADE:
+- Todo código deve ser FUNCIONAL e TESTADO mentalmente antes de entregar
+- Comentários em português, explicativos (não óbvios)
+- Tratamento de erros sempre que relevante
+- Variáveis e funções com nomes descritivos em português ou inglês (consistente)
+- Estrutura limpa: espaçamento correto, indentação consistente
+- Para projetos web: responsivo por padrão, sem dependências desnecessárias
+- Para APIs: inclua exemplos de uso (curl/fetch) sempre
+- Para scripts: inclua exemplo de execução
+
+NUNCA FAÇA:
+- Cortar código no meio com "... resto do código aqui ..."
+- Dar respostas vagas como "depende" sem explicar do quê
+- Repetir a pergunta do usuário antes de responder
+- Usar frases como "Claro!", "Com certeza!", "Ótima pergunta!" — vá direto
+- Fingir que não sabe algo que sabe
+- Gerar código com bugs óbvios ou incompleto`;
+
+const MODES = {
+  free: {
+    label: 'Chat Livre',
+    color: 'var(--neon)',
+    sys: `Você é um assistente inteligente e versátil, especializado em tecnologia e programação.
+Responda perguntas de qualquer área com profundidade e clareza.
+Para assuntos técnicos, dê exemplos práticos e concretos.
+Para dúvidas simples, seja conciso. Para dúvidas complexas, estruture bem a resposta.`
+  },
+  web: {
+    label: 'Site / Web',
+    color: 'var(--sky)',
+    sys: `Você é um desenvolvedor web sênior especialista em HTML5, CSS3, JavaScript moderno e design responsivo.
+
+QUANDO CRIAR UM SITE:
+- Gere o HTML completo em um único arquivo (HTML + CSS + JS inline quando possível)
+- Design moderno, responsivo com mobile-first
+- CSS com variáveis, flexbox/grid — sem frameworks externos a menos que pedido
+- JavaScript vanilla limpo, sem jQuery
+- Sempre inclua: meta viewport, charset UTF-8, título descritivo
+- Animações CSS sutis para dar vida à interface
+- Paleta de cores harmoniosa e tipografia legível
+- Estrutura semântica: header, main, section, footer
+
+EXTRAS QUE SEMPRE ADICIONO SEM PEDIR:
+- Hover effects nos botões e links
+- Transições suaves
+- Design que funciona em dark/light mode quando relevante
+- Formulários com validação básica quando presentes`
+  },
+  app: {
+    label: 'App / React',
+    color: 'var(--violet)',
+    sys: `Você é um desenvolvedor React/TypeScript sênior com expertise em arquitetura de aplicações modernas.
+
+PADRÕES QUE SEMPRE SIGO:
+- React com hooks funcionais (useState, useEffect, useCallback, useMemo, useRef)
+- TypeScript quando pedido, com types bem definidos
+- Componentes pequenos e reutilizáveis com responsabilidade única
+- Estado local para UI, Context/Zustand para estado global
+- CSS Modules ou Tailwind (perguntar preferência), nunca CSS inline em excesso
+- Formulários com React Hook Form ou validação manual bem feita
+- Chamadas de API com async/await, loading states e error handling
+- Acessibilidade básica: aria-labels, roles, keyboard navigation
+
+ESTRUTURA DE COMPONENTE QUE GERO:
+- Props bem tipadas com interface
+- Loading e error states sempre
+- Comentários explicando a lógica não óbvia`
+  },
+  script: {
+    label: 'Python / Script',
+    color: 'var(--lime)',
+    sys: `Você é um programador Python sênior que escreve código pythônico, limpo e eficiente.
+
+PADRÕES OBRIGATÓRIOS:
+- PEP 8: nomenclatura, espaçamento, comprimento de linha
+- Type hints em funções (def calcular(valor: float) -> str:)
+- Docstrings descritivas em funções e classes
+- Tratamento de exceções específico (não genérico "except Exception")
+- Logging ao invés de print() em scripts de produção
+- Argparse para CLIs com --help informativo
+- Context managers (with) para arquivos e recursos
+- List/dict comprehensions quando mais legível que loops
+
+ORGANIZAÇÃO:
+- Funções pequenas com uma responsabilidade
+- main() para scripts executáveis com if __name__ == '__main__'
+- Constantes em MAIÚSCULAS no topo
+- Imports organizados: stdlib → third-party → local`
+  },
+  api: {
+    label: 'API REST',
+    color: 'var(--neon)',
+    sys: `Você é um arquiteto de APIs REST com experiência em Node.js/Express, Python/FastAPI e boas práticas de design.
+
+DESIGN DE API QUE SIGO:
+- Rotas RESTful semânticas: GET /users, POST /users, GET /users/:id, PUT/PATCH /users/:id, DELETE /users/:id
+- Status codes corretos: 200, 201, 400, 401, 403, 404, 422, 500
+- Respostas JSON consistentes: { data, error, message, pagination }
+- Validação de entrada antes de processar
+- Middleware de autenticação JWT quando necessário
+- Rate limiting e CORS configurados
+- Variáveis de ambiente para configurações sensíveis (.env)
+- Tratamento centralizado de erros
+
+SEMPRE INCLUO:
+- Exemplos de requisição curl ou fetch
+- Estrutura de resposta documentada
+- Código de middleware de autenticação quando relevante
+- .env.example com as variáveis necessárias`
+  },
+  planilha: {
+    label: 'Planilha / Excel',
+    color: 'var(--emerald)',
+    sys: `Você é um especialista em Excel, Google Sheets e automação de planilhas com VBA e Google Apps Script.
+
+ABORDAGEM:
+- Entenda o objetivo de negócio antes de propor a solução técnica
+- Prefira fórmulas nativas a macros quando possível (mais fácil de manter)
+- Para cálculos complexos, decomponha em etapas intermediárias
+- Nomeie intervalos para fórmulas mais legíveis
+- Use tabelas dinâmicas quando fizer sentido
+
+FÓRMULAS QUE DOMINO:
+- PROCV/XLOOKUP, ÍNDICE+CORRESP, SOMASE/SOMASES, CONT.SE/CONT.SES
+- TEXTO, CONCATENAR, ESQUERDA/DIREITA/EXT.TEXTO
+- SE aninhados, SEERRO, IFS
+- Fórmulas de array e funções dinâmicas (FILTER, UNIQUE, SORT)
+
+VBA/APPS SCRIPT:
+- Código limpo com comentários explicativos
+- Tratamento de erros com On Error
+- Loops eficientes (evitar Select/Activate)
+- InputBox/MsgBox para interação quando necessário`
+  },
+  sql: {
+    label: 'SQL & Banco',
+    color: 'var(--neon)',
+    sys: `Você é um DBA e desenvolvedor SQL sênior com experiência em PostgreSQL, MySQL, SQLite e modelagem de dados.
+
+QUALIDADE DE QUERIES:
+- Queries legíveis com indentação e aliasing descritivo
+- Joins explícitos (INNER/LEFT/RIGHT JOIN) nunca implícitos
+- WHERE antes de HAVING, índices considerados
+- CTEs (WITH) para queries complexas e legibilidade
+- Evite SELECT * em produção — especifique colunas
+- EXPLAIN ANALYZE para otimização quando relevante
+
+MODELAGEM:
+- Normalização adequada ao caso de uso (nem sempre 3NF é ideal)
+- Naming conventions consistentes (snake_case)
+- Constraints: NOT NULL, UNIQUE, FOREIGN KEY onde necessário
+- Índices nos campos de busca frequente e FKs
+- Timestamps created_at/updated_at em toda tabela principal
+
+SEMPRE INCLUO:
+- DDL (CREATE TABLE) quando criar esquema
+- Dados de exemplo para INSERT
+- Comentários explicando lógica complexa de joins`
+  },
+  debug: {
+    label: 'Debug & Fix',
+    color: 'var(--rose)',
+    sys: `Você é um especialista em debugging e resolução de bugs com raciocínio sistemático.
+
+MEU PROCESSO DE DEBUG:
+1. Leia o erro completo — stack trace, mensagem, linha
+2. Identifique a CAUSA RAIZ, não apenas o sintoma
+3. Explique o que causou o erro em linguagem clara
+4. Proponha a correção mínima e eficaz
+5. Explique por que a correção funciona
+6. Aponte se existe risco de bugs similares no código
+
+TIPOS DE ERRO QUE ANALISO:
+- Erros de sintaxe e semântica
+- Erros de runtime (null pointer, undefined, type errors)
+- Erros de lógica (resultado errado, loop infinito)
+- Erros de ambiente (imports, paths, variáveis de ambiente)
+- Erros de API (status codes, formato de resposta)
+- Erros de performance (queries lentas, memory leaks)
+
+SEMPRE ENTREGO:
+- Código corrigido e funcional
+- Explicação clara do problema
+- Dica para evitar o mesmo erro no futuro`
+  },
+  review: {
+    label: 'Code Review',
+    color: 'var(--amber)',
+    sys: `Você é um engenheiro sênior fazendo code review construtivo e detalhado.
+
+DIMENSÕES QUE ANALISO:
+1. CORRETUDE: O código faz o que deveria? Tem bugs?
+2. SEGURANÇA: SQL injection, XSS, dados sensíveis expostos, inputs não validados?
+3. PERFORMANCE: Queries N+1, loops desnecessários, chamadas redundantes?
+4. LEGIBILIDADE: Nomes descritivos, funções pequenas, complexidade baixa?
+5. MANUTENIBILIDADE: Duplicação de código, responsabilidades misturadas?
+6. BOAS PRÁTICAS: Segue padrões da linguagem/framework?
+
+FORMATO DO FEEDBACK:
+- 🔴 CRÍTICO: Bugs ou vulnerabilidades de segurança
+- 🟡 IMPORTANTE: Performance ou legibilidade significativa
+- 🟢 SUGESTÃO: Melhorias incrementais
+- ✅ POSITIVO: O que está bom (sempre reconheço)
+
+Termino com um resumo e o código refatorado quando necessário.`
+  },
+  docs: {
+    label: 'Documentação',
+    color: 'var(--violet)',
+    sys: `Você é um technical writer e desenvolvedor que cria documentação clara, completa e útil.
+
+TIPOS DE DOC QUE GERO:
+- JSDoc/TSDoc para JavaScript/TypeScript
+- Docstrings Google Style para Python
+- README.md com: descrição, instalação, uso, exemplos, contribuição, licença
+- Comentários inline para lógica não óbvia
+- API docs com exemplos de request/response
+- Guias de início rápido (Getting Started)
+
+PRINCÍPIOS:
+- Documente o "porquê", não apenas o "o quê" (o código já mostra o quê)
+- Exemplos concretos valem mais que descrições abstratas
+- Mantenha docs próximas do código (não em wiki separada)
+- Atualize docs junto com o código
+
+ESTRUTURA DE README QUE USO:
+# Nome do Projeto — descrição em uma linha
+## O que faz (com screenshot/gif se visual)
+## Instalação rápida
+## Uso com exemplos reais
+## Configuração (variáveis de ambiente)
+## Contribuição`
+  },
+  regex: {
+    label: 'Regex Helper',
+    color: 'var(--neon)',
+    sys: `Você é um especialista em expressões regulares para qualquer linguagem (JavaScript, Python, PHP, Java, etc.).
+
+ABORDAGEM:
+- Sempre explique o padrão parte por parte
+- Mostre exemplos de strings que batem E que não batem
+- Avise sobre edge cases e limitações
+- Sugira alternativas mais simples quando regex é overkill
+- Para regex complexos, componha em partes menores
+
+FORMATO DA RESPOSTA:
+1. O regex: /padrão/flags
+2. Explicação parte a parte: \d{3} = três dígitos, etc.
+3. Código de exemplo na linguagem pedida
+4. Casos de teste (match e no-match)
+5. Variações se necessário`
+  },
+  git: {
+    label: 'Git / Versionamento',
+    color: 'var(--lime)',
+    sys: `Você é um especialista em Git, GitHub/GitLab e fluxos de trabalho de desenvolvimento.
+
+COMANDOS E FLUXOS:
+- Git básico: init, add, commit, push, pull, clone
+- Branching: git flow, trunk-based, feature branches
+- Resolução de conflitos: merge vs rebase (explico os tradeoffs)
+- Histórico limpo: squash, amend, interactive rebase
+- Git hooks para automação
+- GitHub Actions / GitLab CI para CI/CD
+
+BOAS PRÁTICAS QUE ENSINO:
+- Commits atômicos com mensagens descritivas (Conventional Commits)
+- .gitignore completo para o tipo de projeto
+- Pull Requests bem descritos
+- Branch protection rules
+- Tags e releases semânticos (SemVer)
+
+Sempre mostro o comando exato, não só a teoria.`
+  },
+};
+
+const modeList = Object.keys(MODES);
+let modeIdx = 0;
+let currentMode = 'free';
+
+// ══ SYSTEM PROMPT — injeta DNA do Claude em todas as APIs ══
+function buildSystemPrompt(modePrompt) {
+  return `${CLAUDE_DNA}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESPECIALIDADE ATIVA PARA ESTA SESSÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${modePrompt}
+
+LEMBRETE FINAL: Responda SEMPRE em português brasileiro. Código completo, nunca cortado. Qualidade acima de tudo.`;
+}
+
+let tabs = [{id:0, name:'Chat 1', history:[], count:0}];
+let activeTab = 0;
+let tabCounter = 1;
+let totalTokens = 0;
+let savedSnippets = [];
+let rpCurrentTab = 'stats';
+
+const tips = [
+  { icon:'💡', title:'Contexto é tudo', text:'Descreva o projeto completo para receber código mais preciso.' },
+  { icon:'🐍', title:'Python scripts', text:'Peça para adicionar argparse e suporte a linha de comando.' },
+  { icon:'⚡', title:'Deploy rápido', text:'Peça para gerar um Dockerfile junto com seu projeto.' },
+  { icon:'🔍', title:'Code Review', text:'Cole seu código para análise de segurança e performance.' },
+  { icon:'📊', title:'Excel/Sheets', text:'Descreva o que a planilha deve calcular com dados de exemplo.' },
+  { icon:'🎯', title:'Precisão', text:'Mencione a linguagem/framework para respostas mais certeiras.' },
+  { icon:'🔄', title:'Iteração', text:'Peça melhorias incrementais: "adicione autenticação", "optimize esta query".' },
+  { icon:'🧪', title:'Testes', text:'Peça sempre para gerar testes unitários junto com o código.' },
+];
+
+// ══════════ INIT ══════════
+const txt = document.getElementById('txt');
+const msgs = document.getElementById('messages');
+const sendBtn = document.getElementById('send');
+
+txt.addEventListener('input', () => { autoH(); updateCount(); });
+txt.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} });
+
+function autoH() { txt.style.height='auto'; txt.style.height=Math.min(txt.scrollHeight,150)+'px'; }
+function updateCount() { document.getElementById('char-c').textContent=txt.value.length+' c'; }
+function clearTxt() { txt.value=''; autoH(); updateCount(); txt.focus(); }
+
+// Render tips
+const tipsList = document.getElementById('tips-list');
+tips.forEach(t=>{
+  const el=document.createElement('div');
+  el.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:all 0.2s';
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:14px">${t.icon}</span><span style="font-size:11px;font-weight:600;color:var(--text-1)">${t.title}</span></div><div style="font-size:10px;color:var(--text-3);line-height:1.5">${t.text}</div>`;
+  el.addEventListener('mouseenter',()=>el.style.borderColor='var(--border)');
+  tipsList.appendChild(el);
+});
+
+// ══════════ MODE ══════════
+function setMode(key, el) {
+  currentMode = key;
+  modeIdx = modeList.indexOf(key);
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('mode-chip-label').textContent = MODES[key].label;
+  document.getElementById('st-mode').textContent = MODES[key].label;
+  toast(`✦ Modo: ${MODES[key].label}`);
+}
+
+function cycleModeBtn() {
+  modeIdx = (modeIdx+1) % modeList.length;
+  currentMode = modeList[modeIdx];
+  document.getElementById('mode-chip-label').textContent = MODES[currentMode].label;
+  document.getElementById('st-mode').textContent = MODES[currentMode].label;
+  document.querySelectorAll('.sb-item').forEach((el,i)=>el.classList.toggle('active',i===modeIdx));
+  toast(`✦ ${MODES[currentMode].label}`);
+}
+
+function quickMode(mode, prefill) {
+  currentMode = mode;
+  modeIdx = modeList.indexOf(mode);
+  document.getElementById('mode-chip-label').textContent = MODES[mode].label;
+  document.querySelectorAll('.sb-item').forEach((el,i)=>el.classList.toggle('active',i===modeIdx));
+  txt.value = prefill;
+  autoH(); updateCount();
+  txt.focus();
+}
+
+function useChip(text) { txt.value=text; txt.focus(); autoH(); updateCount(); }
+function inject(s) { txt.value+=s; txt.focus(); autoH(); updateCount(); }
+
+// ══════════ TABS ══════════
+function getTab() { return tabs.find(t=>t.id===activeTab) || tabs[0]; }
+
+function newChat() {
+  const id=tabCounter++;
+  tabs.push({id,name:`Chat ${id+1}`,history:[],count:0});
+  activeTab=id;
+  renderTabs();
+  msgs.innerHTML=buildWelcome();
+  updateStats();
+  toast('💬 Nova aba aberta');
+}
+
+function closeFileTab(e,id) {
+  e.stopPropagation();
+  if(tabs.length===1){toast('⚠ Não é possível fechar a única aba');return;}
+  tabs=tabs.filter(t=>t.id!==id);
+  if(activeTab===id){
+    activeTab=tabs[tabs.length-1].id;
+    msgs.innerHTML=buildWelcome();
+  }
+  renderTabs();
+  updateStats();
+}
+
+function renderTabs() {
+  // Top tabs
+  const topBar = document.getElementById('chat-tab-bar');
+  topBar.querySelectorAll('.top-tab[data-id]').forEach(t=>t.remove());
+  const addBtn = topBar.querySelector('.top-tab:not([data-id])');
+  tabs.forEach(tab=>{
+    const el=document.createElement('div');
+    el.className='top-tab'+(tab.id===activeTab?' active':'');
+    el.dataset.id=tab.id;
+    el.innerHTML=`<div class="dot" style="${tab.id===activeTab?'':'background:var(--text-4);box-shadow:none'}"></div><span>${tab.name}</span>`;
+    el.onclick=()=>{activeTab=tab.id;renderTabs();};
+    topBar.insertBefore(el,addBtn);
+  });
+  // File tabs
+  const fileTabs=document.getElementById('file-tabs');
+  fileTabs.querySelectorAll('.file-tab').forEach(t=>t.remove());
+  const addFab=fileTabs.querySelector('.add-tab');
+  tabs.forEach(tab=>{
+    const el=document.createElement('div');
+    el.className='file-tab'+(tab.id===activeTab?' active':'');
+    el.innerHTML=`<span>${tab.name.toLowerCase().replace(' ','-')}</span><span class="file-tab-ext">.ai</span><span class="file-tab-close" onclick="closeFileTab(event,${tab.id})">✕</span>`;
+    el.onclick=ev=>{if(!ev.target.classList.contains('file-tab-close')){activeTab=tab.id;renderTabs();}};
+    fileTabs.insertBefore(el,addFab);
+  });
+  document.getElementById('st-tabs').textContent=tabs.length;
+}
+
+// ══════════ VIEWS ══════════
+function setView(v,btn) {
+  document.querySelectorAll('#iconbar .icon-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  toast(`🔄 Vista: ${v}`);
+}
+
+function setRpTab(el, tab) {
+  document.querySelectorAll('.rp-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  rpCurrentTab=tab;
+  document.getElementById('tab-stats').style.display=tab==='stats'?'block':'none';
+  document.getElementById('tab-snippets').style.display=tab==='snippets'?'block':'none';
+  document.getElementById('tab-tips').style.display=tab==='tips'?'block':'none';
+}
+
+// ══════════════════════════════════════════════════
+// ZICAO.DEV — MOTOR DE CHAMADA (Vercel Edition)
+// Chaves ficam seguras no servidor. O browser só chama /api/chat
+// Cascata no servidor: Claude → Groq → Gemini → Mistral → OpenRouter → xAI
+// ══════════════════════════════════════════════════
+
+const PROVIDER_LABELS = {
+  claude:     '⚡ Claude Sonnet',
+  groq:       '🟢 Groq · Llama 3',
+  gemini:     '🔵 Gemini Flash',
+  mistral:    '🟠 Mistral Large',
+  openrouter: '🟣 OpenRouter',
+  xai:        '⚫ xAI Grok',
+};
+
+let currentProvider = 'claude';
+
+function setProvider(p) {
+  currentProvider = p;
+  const label = PROVIDER_LABELS[p] || p;
+  document.getElementById('model-label-top').textContent = label + ' · online';
+}
+
+function updateThinkingText(el, text) {
+  const s = el.querySelector('#think-txt');
+  if (s) s.textContent = text;
+}
+
+// Chama o backend Vercel — seguro, sem expor chaves
+async function callBackend(system, messages, thinkEl) {
+  updateThinkingText(thinkEl, '⚡ Conectando via Claude...');
+
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system, messages }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  if (!data.ok || !data.reply) throw new Error(data.error || 'Resposta vazia');
+
+  setProvider(data.provider || 'claude');
+  return data.reply;
+}
+
+// ══════════ SEND ══════════
+async function sendMsg() {
+  const text = txt.value.trim();
+  if (!text || sendBtn.disabled) return;
+
+  const tab = getTab();
+  document.getElementById('welcome-screen')?.remove();
+
+  addMsg('user', text);
+  tab.history.push({ role: 'user', content: text });
+  tab.count++;
+  txt.value = ''; autoH(); updateCount();
+  sendBtn.disabled = true;
+
+  const thinkEl = addThinking();
+  const m = MODES[currentMode];
+  const system = buildSystemPrompt(m.sys);
+
+  try {
+    const reply = await callBackend(system, tab.history, thinkEl);
+    thinkEl.remove();
+
+    tab.history.push({ role: 'assistant', content: reply });
+    tab.count++;
+    totalTokens += Math.round((text.length + reply.length) / 3.5);
+    if (tab.history.length > 32) tab.history = tab.history.slice(-30);
+
+    addMsg('ai', reply, currentProvider);
+    updateStats();
+    pushHistory(text);
+
+  } catch(e) {
+    thinkEl.remove();
+    addMsg('ai', `❌ Erro: ${e.message}`);
+  }
+  sendBtn.disabled = false;
+  txt.focus();
+}
+
+// ══════════ MESSAGES ══════════
+function addMsg(role, content, provider) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  const t = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  const name = role === 'ai' ? 'zicao.dev' : 'Você';
+  const providerTag = role === 'ai' && provider
+    ? `<span class="msg-mode-tag" style="color:var(--neon)">${PROVIDER_LABELS[provider]||provider}</span>`
+    : '';
+  el.innerHTML = `
+    <div class="msg-av">${role==='ai'?'◈':'👤'}</div>
+    <div class="msg-body-wrap">
+      <div class="msg-meta">
+        <span class="msg-name">${name}</span>
+        <span class="msg-ts">${t}</span>
+        <span class="msg-mode-tag">${MODES[currentMode].label}</span>
+        ${providerTag}
+      </div>
+      <div class="msg-text">${render(content)}</div>
+    </div>
+    <div class="msg-acts">
+      <button class="act-btn" onclick="copyMsg(this)">📋 Copiar</button>
+    </div>`;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addThinking() {
+  const el=document.createElement('div');
+  el.className='msg ai'; el.id='think-el';
+  el.innerHTML=`<div class="msg-av">◈</div><div class="msg-body-wrap"><div class="thinking"><div class="think-dots"><span></span><span></span><span></span></div><span id="think-txt">Gerando resposta</span></div></div>`;
+  msgs.appendChild(el);
+  msgs.scrollTop=msgs.scrollHeight;
+
+  // Cycling text
+  const phrases=['Gerando resposta','Pensando...','Escrevendo código','Analisando...','Finalizando'];
+  let pi=0;
+  el._interval=setInterval(()=>{
+    pi=(pi+1)%phrases.length;
+    const thinkTxt=el.querySelector('#think-txt');
+    if(thinkTxt) thinkTxt.textContent=phrases[pi];
+  },1200);
+
+  const orig=el.remove.bind(el);
+  el.remove=()=>{ clearInterval(el._interval); orig(); };
+  return el;
+}
+
+// ══════════ RENDER ══════════
+function render(text) {
+  // Code blocks with line numbers and highlighting
+  text=text.replace(/```(\w+)?\n?([\s\S]*?)```/g,(_,lang,code)=>{
+    const l=(lang||'code').toLowerCase();
+    const escaped=code.trim().replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const lines=syntaxHL(escaped,l).split('\n');
+    const lineHTML=lines.map((ln,i)=>`<div class="code-line"><span class="ln">${i+1}</span><span>${ln}</span></div>`).join('');
+    return `<div class="code-wrap">
+      <div class="code-top">
+        <div class="code-lang-tag"><div class="lang-dot"></div>${lang||'code'}</div>
+        <div class="code-btns">
+          <button class="code-btn" onclick="saveSnip(this,'${l}')">💾 Salvar</button>
+          <button class="code-btn" onclick="copyCode(this)">📋 Copiar</button>
+        </div>
+      </div>
+      <div class="code-lines">${lineHTML}</div>
+    </div>`;
+  });
+
+  // Inline code
+  text=text.replace(/`([^`\n]+)`/g,'<span class="ic">$1</span>');
+  // Bold
+  text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  // Italic
+  text=text.replace(/\*([^*\n]+?)\*/g,'<em>$1</em>');
+  // H3
+  text=text.replace(/^### (.+)$/gm,'<div style="font-size:13px;font-weight:700;color:var(--lime);margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border)">$1</div>');
+  // H2
+  text=text.replace(/^## (.+)$/gm,'<div style="font-size:15px;font-weight:700;color:var(--neon);margin:14px 0 8px">$1</div>');
+  // H1
+  text=text.replace(/^# (.+)$/gm,'<div style="font-size:17px;font-weight:800;color:var(--text-1);margin:16px 0 10px;letter-spacing:-0.02em">$1</div>');
+  // List items
+  text=text.replace(/^[-•*]\s(.+)$/gm,'<div style="padding:3px 0 3px 14px;position:relative"><span style="position:absolute;left:0;color:var(--neon)">▸</span>$1</div>');
+  // Numbered lists
+  text=text.replace(/^(\d+)\.\s(.+)$/gm,'<div style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--violet);font-family:var(--mono);font-size:11px">$1.</span>$2</div>');
+  // Line breaks
+  text=text.replace(/\n{2,}/g,'<br><br>');
+  text=text.replace(/\n/g,'<br>');
+  return `<div>${text}</div>`;
+}
+
+// ══════════ SYNTAX HIGHLIGHT ══════════
+function syntaxHL(code, lang) {
+  if(['js','javascript','ts','typescript'].includes(lang)) {
+    code=code.replace(/(\/\/[^\n]*)/g,'<span class="t-cmt">$1</span>');
+    code=code.replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="t-cmt">$1</span>');
+    code=code.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)/g,'<span class="t-str">$1</span>');
+    code=code.replace(/\b(const|let|var|function|class|return|if|else|for|while|do|switch|case|break|continue|import|export|default|new|this|async|await|try|catch|finally|throw|typeof|instanceof|in|of|from|extends|super|static|get|set|yield|delete|void|null|undefined)\b/g,'<span class="t-kw">$1</span>');
+    code=code.replace(/\b(true|false)\b/g,'<span class="t-bool">$1</span>');
+    code=code.replace(/\b(\d+\.?\d*)\b/g,'<span class="t-num">$1</span>');
+    code=code.replace(/([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g,'<span class="t-fn">$1</span>');
+  } else if(['python','py'].includes(lang)) {
+    code=code.replace(/(#[^\n]*)/g,'<span class="t-cmt">$1</span>');
+    code=code.replace(/("""[\s\S]*?"""|'''[\s\S]*?''')/g,'<span class="t-str">$1</span>');
+    code=code.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g,'<span class="t-str">$1</span>');
+    code=code.replace(/\b(def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|and|or|not|in|is|True|False|None|lambda|pass|break|continue|global|nonlocal|yield|assert|del)\b/g,'<span class="t-kw">$1</span>');
+    code=code.replace(/\b(\d+\.?\d*)\b/g,'<span class="t-num">$1</span>');
+    code=code.replace(/def\s+(<span[^>]*>def<\/span>\s+)?([a-zA-Z_]\w*)/g,(_,kw,fn)=>`${kw||'<span class="t-kw">def</span> '}<span class="t-fn">${fn}</span>`);
+    code=code.replace(/class\s+([A-Z][a-zA-Z0-9_]*)/g,'<span class="t-kw">class</span> <span class="t-cls">$1</span>');
+  } else if(lang==='css') {
+    code=code.replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="t-cmt">$1</span>');
+    code=code.replace(/([a-zA-Z-]+)\s*:/g,'<span class="t-prop">$1</span>:');
+    code=code.replace(/(#[0-9a-fA-F]{3,8})/g,'<span class="t-str">$1</span>');
+    code=code.replace(/\b(\d+\.?\d*(?:px|em|rem|%|vh|vw|s|ms))\b/g,'<span class="t-num">$1</span>');
+  } else if(lang==='html') {
+    code=code.replace(/(&lt;!--[\s\S]*?--&gt;)/g,'<span class="t-cmt">$1</span>');
+    code=code.replace(/(&lt;\/?)([\w-]+)/g,'$1<span class="t-kw">$2</span>');
+    code=code.replace(/([\w-]+)=/g,'<span class="t-prop">$1</span>=');
+    code=code.replace(/("(?:[^"\\]|\\.)*")/g,'<span class="t-str">$1</span>');
+  } else if(lang==='sql') {
+    code=code.replace(/(--[^\n]*)/g,'<span class="t-cmt">$1</span>');
+    code=code.replace(/\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|CROSS|ON|GROUP\s+BY|ORDER\s+BY|HAVING|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|ALTER|DROP|INDEX|PRIMARY\s+KEY|FOREIGN\s+KEY|REFERENCES|UNIQUE|NOT\s+NULL|DEFAULT|AUTO_INCREMENT|SERIAL|AND|OR|NOT|IN|LIKE|BETWEEN|IS|NULL|AS|DISTINCT|COUNT|SUM|AVG|MAX|MIN|WITH|UNION|EXISTS|CASE|WHEN|THEN|ELSE|END)\b/gi,'<span class="t-kw">$1</span>');
+    code=code.replace(/('(?:[^'\\]|\\.)*')/g,'<span class="t-str">$1</span>');
+    code=code.replace(/\b(\d+\.?\d*)\b/g,'<span class="t-num">$1</span>');
+  } else if(['bash','sh','shell'].includes(lang)) {
+    code=code.replace(/(#[^\n]*)/g,'<span class="t-cmt">$1</span>');
+    code=code.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g,'<span class="t-str">$1</span>');
+    code=code.replace(/\b(if|then|else|elif|fi|for|in|do|done|while|case|esac|function|return|export|source|echo|cd|ls|mkdir|rm|cp|mv|chmod|sudo|apt|npm|pip|git|docker)\b/g,'<span class="t-kw">$1</span>');
+    code=code.replace(/(\$[\w{][^}\s]*)/g,'<span class="t-fn">$1</span>');
+  }
+  return code;
+}
+
+// ══════════ ACTIONS ══════════
+function copyCode(btn) {
+  const code=btn.closest('.code-wrap').querySelector('.code-lines').innerText;
+  navigator.clipboard.writeText(code).then(()=>{
+    btn.textContent='✓ Copiado!'; btn.classList.add('saved');
+    setTimeout(()=>{btn.textContent='📋 Copiar';btn.classList.remove('saved');},2000);
+  });
+}
+
+function saveSnip(btn,lang) {
+  const code=btn.closest('.code-wrap').querySelector('.code-lines').innerText;
+  savedSnippets.push({lang,code,ts:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})});
+  renderSnippets();
+  btn.textContent='✓ Salvo!'; btn.classList.add('saved');
+  setTimeout(()=>{btn.textContent='💾 Salvar';btn.classList.remove('saved');},2000);
+  toast('💾 Snippet salvo!');
+}
+
+function renderSnippets() {
+  const el=document.getElementById('snippets-panel');
+  document.getElementById('st-snips').textContent=savedSnippets.length;
+  if(!savedSnippets.length){
+    el.innerHTML='<div style="text-align:center;padding:24px 0;font-size:12px;color:var(--text-4);line-height:1.7">Nenhum snippet salvo.<br>Clique em 💾 em qualquer bloco de código.</div>';
+    return;
+  }
+  el.innerHTML=savedSnippets.map((s,i)=>`
+    <div class="snip-entry" onclick="loadSnip(${i})">
+      <div class="snip-lang">${s.lang}</div>
+      <div class="snip-name">Snippet ${i+1} · ${s.ts}</div>
+      <div class="snip-preview">${s.code.slice(0,60)}...</div>
+    </div>`).join('');
+}
+
+function loadSnip(i) {
+  txt.value=`Explique este código e melhore se possível:\n\`\`\`\n${savedSnippets[i].code}\n\`\`\``;
+  txt.focus(); autoH(); updateCount();
+}
+
+function copyMsg(btn) {
+  const body=btn.closest('.msg').querySelector('.msg-text').innerText;
+  navigator.clipboard.writeText(body).then(()=>{
+    btn.textContent='✓ Copiado!';
+    setTimeout(()=>btn.textContent='📋 Copiar',2000);
+  });
+}
+
+function clearAll() {
+  const tab=getTab();
+  tab.history=[]; tab.count=0;
+  msgs.innerHTML=buildWelcome();
+  updateStats();
+  toast('🗑 Chat limpo');
+}
+
+function exportMd() {
+  const tab=getTab();
+  if(!tab.history.length){toast('⚠ Nenhuma mensagem para exportar');return;}
+  const md=tab.history.map(m=>`**${m.role==='user'?'Você':'zicao.dev'}:**\n${m.content}`).join('\n\n---\n\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown'}));
+  a.download=`zicao-dev-${Date.now()}.md`; a.click();
+  toast('⬇ Chat exportado');
+}
+
+function deployProject() { toast('⚡ Deploy: Copie o HTML gerado e faça upload no Vercel, Netlify ou GitHub Pages!'); }
+
+function updateStats() {
+  const tab=getTab();
+  document.getElementById('st-msgs').textContent=tab.count;
+  document.getElementById('st-tokens').textContent=totalTokens.toLocaleString();
+  const pct=Math.min(Math.round((totalTokens/8000)*100),100);
+  document.getElementById('st-ctx-pct').textContent=pct+'%';
+  document.getElementById('ctx-bar').style.width=pct+'%';
+}
+
+function pushHistory(text) {
+  const hl=document.getElementById('hist-list');
+  if(hl.querySelector('div[style]')) hl.innerHTML='';
+  const el=document.createElement('div'); el.className='hist-entry';
+  el.innerHTML=`<div class="hist-entry-dot"></div><div class="hist-entry-text">${text.slice(0,36)}${text.length>36?'...':''}</div>`;
+  hl.insertBefore(el,hl.firstChild);
+  if(hl.children.length>8) hl.lastChild.remove();
+}
+
+function buildWelcome() {
+  return `<div class="welcome" id="welcome-screen">
+    <div class="welcome-emblem">◈</div>
+    <div class="welcome-title">zicao.dev</div>
+    <div class="welcome-sub">A IA mais completa para programar.<br>Crie <em>sites</em>, <em>apps</em>, <em>APIs</em>, <em>planilhas</em> e <em>scripts</em> — tudo com linguagem natural.</div>
+    <div class="mode-grid">
+      <div class="mode-card mc-web" onclick="quickMode('web','Crie um site HTML/CSS/JS moderno e responsivo')"><div class="mc-icon-wrap" style="color:var(--sky)">🌐</div><div class="mc-title">Site / Web</div><div class="mc-desc">Landing pages, portfólios</div></div>
+      <div class="mode-card mc-app" onclick="quickMode('app','Crie um app React completo')"><div class="mc-icon-wrap" style="color:var(--violet)">📱</div><div class="mc-title">App / React</div><div class="mc-desc">Componentes, hooks</div></div>
+      <div class="mode-card mc-script" onclick="quickMode('script','Crie um script Python útil')"><div class="mc-icon-wrap" style="color:var(--lime)">🐍</div><div class="mc-title">Python</div><div class="mc-desc">Scripts, automação</div></div>
+      <div class="mode-card mc-api" onclick="quickMode('api','Crie uma API REST completa')"><div class="mc-icon-wrap" style="color:var(--neon)">🚀</div><div class="mc-title">API REST</div><div class="mc-desc">Node.js, Express</div></div>
+      <div class="mode-card mc-planilha" onclick="quickMode('planilha','Crie uma planilha Excel')"><div class="mc-icon-wrap" style="color:var(--emerald)">📊</div><div class="mc-title">Planilha</div><div class="mc-desc">Excel, Sheets</div></div>
+      <div class="mode-card mc-debug" onclick="quickMode('debug','Analise este erro:')"><div class="mc-icon-wrap" style="color:var(--rose)">🐛</div><div class="mc-title">Debug</div><div class="mc-desc">Corrija bugs</div></div>
+    </div>
+    <div class="quick-chips">
+      <div class="chip" onclick="useChip('Crie um jogo da velha completo em HTML/JS')">🎮 Jogo da Velha</div>
+      <div class="chip" onclick="useChip('Crie um app de tarefas com localStorage')">✅ Todo App</div>
+      <div class="chip" onclick="useChip('Crie um chatbot simples em Python')">🤖 Chatbot Python</div>
+      <div class="chip" onclick="useChip('Crie uma query SQL para relatório de vendas com JOIN')">📈 SQL Relatório</div>
+    </div>
+  </div>`;
+}
+
+function showStatusModal() {
+  document.getElementById('status-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.id = 'status-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9000;display:flex;align-items:center;justify-content:center;animation:fadeUp 0.25s ease;';
+  modal.innerHTML = `
+    <div style="background:#111;border:1px solid #222;border-radius:16px;padding:28px;width:480px;max-width:95vw;box-shadow:0 32px 100px rgba(0,0,0,0.9)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:#f0f0f0">● Status do Sistema</div>
+          <div style="font-size:11px;color:#444;margin-top:3px;font-family:var(--mono)">Motor cascata ativo · Claude primeiro</div>
+        </div>
+        <button onclick="document.getElementById('status-modal').remove()" style="background:transparent;border:none;color:#444;font-size:20px;cursor:pointer">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+        ${[
+          {n:'⚡ Claude Sonnet',p:'1º — Primário',c:'#e8b735',t:'Melhor qualidade'},
+          {n:'🟢 Groq · Llama 3',p:'2º — Fallback',c:'#4ade80',t:'Mais rápido · Grátis'},
+          {n:'🔵 Gemini Flash',p:'3º — Fallback',c:'#60a5fa',t:'Generoso · Grátis'},
+          {n:'🟠 Mistral Large',p:'4º — Fallback',c:'#fb923c',t:'1B tokens/mês · Grátis'},
+          {n:'🟣 OpenRouter',p:'5º — Fallback',c:'#a78bfa',t:'100+ modelos · Grátis'},
+          {n:'⚫ xAI Grok',p:'6º — Fallback',c:'#f0f0f0',t:'Créditos grátis'},
+        ].map(p => `<div style="background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:12px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${p.c};box-shadow:0 0 8px ${p.c};flex-shrink:0"></div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:600;color:#f0f0f0">${p.n}</div><div style="font-size:10px;color:#555">${p.t}</div></div>
+          <div style="font-size:10px;font-family:var(--mono);color:${p.c}">${p.p}</div>
+        </div>`).join('')}
+      </div>
+      <div style="background:#0a0a0a;border:1px solid #1a1a1a;border-radius:10px;padding:12px 14px;font-size:11px;color:#555;line-height:1.8">
+        🔑 As chaves de API ficam <strong style="color:#4ade80">seguras no servidor Vercel</strong> — nunca expostas no navegador.<br>
+        Configure em: Vercel Dashboard → seu projeto → Settings → Environment Variables
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function toast(msg, icon='') {
+  const el=document.createElement('div'); el.className='toast';
+  el.innerHTML=`<span class="toast-icon">${icon||msg[0]}</span><span>${msg}</span>`;
+  document.body.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.3s';setTimeout(()=>el.remove(),300);},2500);
+}
+
+// Inicializa o status ao carregar
+window.addEventListener('load', () => {
+  setProvider('claude');
+  toast('🚀 zicao.dev pronta! Motor cascata ativo.');
+});
+
+</script>
+</body>
+</html>
