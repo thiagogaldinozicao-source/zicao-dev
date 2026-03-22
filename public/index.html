@@ -704,7 +704,7 @@ html, body {
     </div>
     <button class="top-btn" onclick="clearAll()">✕ Limpar</button>
     <button class="top-btn" onclick="exportMd()">⬇ Exportar</button>
-    <button class="top-btn" onclick="showStatusModal()" style="border-color:#4ade80;color:#4ade80">● Status</button>
+    <button class="top-btn" onclick="showConfigModal()" style="border-color:#e8b735;color:#e8b735">⚙ APIs</button>
     <button class="top-btn primary" onclick="deployProject()">⚡ Deploy</button>
   </div>
 </div>
@@ -1380,7 +1380,16 @@ const PROVIDER_LABELS = {
   xai:        '⚫ xAI Grok',
 };
 
-let currentProvider = 'claude';
+let currentProvider = 'groq';
+
+// Chaves salvas no navegador (localStorage)
+const KEYS = {
+  get groq()        { return localStorage.getItem('zicao_groq') || ''; },
+  get gemini()      { return localStorage.getItem('zicao_gemini') || ''; },
+  get mistral()     { return localStorage.getItem('zicao_mistral') || ''; },
+  get openrouter()  { return localStorage.getItem('zicao_openrouter') || ''; },
+  get claude()      { return localStorage.getItem('zicao_claude') || ''; },
+};
 
 function setProvider(p) {
   currentProvider = p;
@@ -1393,32 +1402,164 @@ function updateThinkingText(el, text) {
   if (s) s.textContent = text;
 }
 
-// Chama o backend Vercel — seguro, sem expor chaves
-async function callBackend(system, messages, thinkEl) {
-  updateThinkingText(thinkEl, '⚡ Conectando via Claude...');
+function hasAnyKey() {
+  return !!(KEYS.groq || KEYS.gemini || KEYS.mistral || KEYS.openrouter || KEYS.claude);
+}
 
-  const res = await fetch('/api/chat', {
+// ── Groq direto do browser ──
+async function tryGroq(sys, history) {
+  if (!KEYS.groq) throw new Error('no_key');
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ system, messages }),
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KEYS.groq}` },
+    body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 2000,
+      messages: [{ role: 'system', content: sys }, ...history] })
   });
+  const d = await res.json();
+  if (!res.ok) throw new Error(d.error?.message || `groq_${res.status}`);
+  return d.choices?.[0]?.message?.content || '';
+}
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `HTTP ${res.status}`);
+// ── Gemini direto do browser ──
+async function tryGemini(sys, history) {
+  if (!KEYS.gemini) throw new Error('no_key');
+  const contents = history.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${KEYS.gemini}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system_instruction: { parts: [{ text: sys }] }, contents,
+        generationConfig: { maxOutputTokens: 2000 } }) }
+  );
+  const d = await res.json();
+  if (!res.ok) throw new Error(d.error?.message || `gemini_${res.status}`);
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+// ── Mistral direto do browser ──
+async function tryMistral(sys, history) {
+  if (!KEYS.mistral) throw new Error('no_key');
+  const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KEYS.mistral}` },
+    body: JSON.stringify({ model: 'mistral-large-latest', max_tokens: 2000,
+      messages: [{ role: 'system', content: sys }, ...history] })
+  });
+  const d = await res.json();
+  if (!res.ok) throw new Error(d.error?.message || `mistral_${res.status}`);
+  return d.choices?.[0]?.message?.content || '';
+}
+
+// ── OpenRouter direto do browser ──
+async function tryOpenRouter(sys, history) {
+  if (!KEYS.openrouter) throw new Error('no_key');
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KEYS.openrouter}`,
+      'HTTP-Referer': 'https://zicao.dev', 'X-Title': 'zicao.dev' },
+    body: JSON.stringify({ model: 'meta-llama/llama-3.3-70b-instruct:free', max_tokens: 2000,
+      messages: [{ role: 'system', content: sys }, ...history] })
+  });
+  const d = await res.json();
+  if (!res.ok) throw new Error(d.error?.message || `openrouter_${res.status}`);
+  return d.choices?.[0]?.message?.content || '';
+}
+
+// ── ENGINE CASCATA: Groq → Gemini → Mistral → OpenRouter ──
+async function callBackend(system, messages, thinkEl) {
+  const providers = [
+    { id: 'groq',       fn: tryGroq,       label: '🟢 Groq' },
+    { id: 'gemini',     fn: tryGemini,     label: '🔵 Gemini' },
+    { id: 'mistral',    fn: tryMistral,    label: '🟠 Mistral' },
+    { id: 'openrouter', fn: tryOpenRouter, label: '🟣 OpenRouter' },
+  ];
+
+  for (const p of providers) {
+    if (!KEYS[p.id]) continue;
+    try {
+      updateThinkingText(thinkEl, `${p.label} pensando...`);
+      const reply = await p.fn(system, messages);
+      if (reply) { setProvider(p.id); return reply; }
+    } catch(e) {
+      if (e.message === 'no_key') continue;
+      toast(`⚠ ${p.label} falhou → próxima...`);
+    }
   }
+  throw new Error('all_failed');
+}
 
-  const data = await res.json();
-  if (!data.ok || !data.reply) throw new Error(data.error || 'Resposta vazia');
+// Modal para configurar chaves
+function showConfigModal() {
+  document.getElementById('cfg-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.id = 'cfg-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9000;display:flex;align-items:center;justify-content:center;animation:fadeUp 0.25s ease';
 
-  setProvider(data.provider || 'claude');
-  return data.reply;
+  const fields = [
+    { id:'groq',       label:'🟢 Groq',       site:'console.groq.com',       desc:'100% Grátis — Llama 3 70B',      color:'#4ade80' },
+    { id:'gemini',     label:'🔵 Gemini',      site:'aistudio.google.com',    desc:'100% Grátis — Gemini 2.0 Flash', color:'#60a5fa' },
+    { id:'mistral',    label:'🟠 Mistral',     site:'console.mistral.ai',     desc:'Grátis — Mistral Large',         color:'#fb923c' },
+    { id:'openrouter', label:'🟣 OpenRouter',  site:'openrouter.ai/keys',     desc:'Grátis com créditos',            color:'#a78bfa' },
+    { id:'claude',     label:'⚡ Claude',      site:'console.anthropic.com',  desc:'★ Melhor — pago por uso',        color:'#e8b735' },
+  ].map(f => `
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;font-weight:700;color:${f.color}">${f.label}</span>
+        <a href="https://${f.site}" target="_blank" style="font-size:10px;color:#444;text-decoration:none;font-family:var(--mono)">${f.site} ↗</a>
+      </div>
+      <div style="font-size:10px;color:#444;margin-bottom:5px">${f.desc}</div>
+      <input id="k-${f.id}" type="password" value="${localStorage.getItem('zicao_'+f.id)||''}"
+        placeholder="Cole sua API key aqui..."
+        style="width:100%;background:#0a0a0a;border:1px solid #222;border-radius:7px;padding:8px 12px;color:#f0f0f0;font-family:var(--mono);font-size:11px;outline:none"
+        onfocus="this.style.borderColor='${f.color}'" onblur="this.style.borderColor='#222'"/>
+    </div>`).join('');
+
+  modal.innerHTML = `
+    <div style="background:#111;border:1px solid #222;border-radius:16px;padding:24px 28px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 32px 100px rgba(0,0,0,0.9)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:18px">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:#f0f0f0">⚙ Suas Chaves de API</div>
+          <div style="font-size:11px;color:#444;margin-top:3px;font-family:var(--mono)">Salvas só no seu navegador · Cascata automática</div>
+        </div>
+        <button onclick="document.getElementById('cfg-modal').remove()" style="background:transparent;border:none;color:#444;font-size:20px;cursor:pointer">✕</button>
+      </div>
+      ${fields}
+      <div style="background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:10px 14px;margin:14px 0;font-size:11px;color:#555;line-height:1.7">
+        💡 Coloque pelo menos <strong style="color:#4ade80">Groq + Gemini</strong> — ambas grátis e o sistema alterna automaticamente!
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onclick="saveKeys()" style="flex:1;background:linear-gradient(135deg,#e8b735,#b8941a);border:none;color:#000;font-family:var(--ff);font-size:13px;font-weight:800;padding:12px;border-radius:9px;cursor:pointer">💾 Salvar e Conectar</button>
+        <button onclick="document.getElementById('cfg-modal').remove()" style="background:#1a1a1a;border:1px solid #222;color:#666;font-family:var(--ff);font-size:13px;padding:12px 18px;border-radius:9px;cursor:pointer">Fechar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function saveKeys() {
+  ['groq','gemini','mistral','openrouter','claude'].forEach(id => {
+    const val = document.getElementById('k-'+id)?.value.trim() || '';
+    if (val) localStorage.setItem('zicao_'+id, val);
+    else localStorage.removeItem('zicao_'+id);
+  });
+  document.getElementById('cfg-modal')?.remove();
+  const first = ['groq','gemini','mistral','openrouter','claude'].find(id => localStorage.getItem('zicao_'+id));
+  if (first) { setProvider(first); toast('✅ Chaves salvas! Pode usar agora.'); }
+  else toast('⚠ Adicione pelo menos uma chave!');
 }
 
 // ══════════ SEND ══════════
 async function sendMsg() {
   const text = txt.value.trim();
   if (!text || sendBtn.disabled) return;
+
+  if (!hasAnyKey()) {
+    showConfigModal();
+    toast('⚙ Configure suas chaves de API primeiro!');
+    return;
+  }
 
   const tab = getTab();
   document.getElementById('welcome-screen')?.remove();
@@ -1737,10 +1878,15 @@ function toast(msg, icon='') {
   setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.3s';setTimeout(()=>el.remove(),300);},2500);
 }
 
-// Inicializa o status ao carregar
+// Inicializa ao carregar
 window.addEventListener('load', () => {
-  setProvider('claude');
-  toast('🚀 zicao.dev pronta! Motor cascata ativo.');
+  if (!hasAnyKey()) {
+    setTimeout(() => showConfigModal(), 800);
+  } else {
+    const first = ['groq','gemini','mistral','openrouter','claude'].find(id => localStorage.getItem('zicao_'+id));
+    if (first) setProvider(first);
+    toast('🚀 zicao.dev pronta!');
+  }
 });
 
 </script>
