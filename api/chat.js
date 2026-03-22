@@ -33,7 +33,7 @@ async function tryClaude(system, messages) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 4000,
+      max_tokens: 2000,
       system,
       messages,
     }),
@@ -54,7 +54,7 @@ async function tryGroq(system, messages) {
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
-      max_tokens: 4000,
+      max_tokens: 2000,
       messages: [{ role: 'system', content: system }, ...messages],
     }),
   });
@@ -102,7 +102,7 @@ async function tryMistral(system, messages) {
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
     body: JSON.stringify({
       model: 'mistral-large-latest',
-      max_tokens: 4000,
+      max_tokens: 2000,
       messages: [{ role: 'system', content: system }, ...messages],
     }),
   });
@@ -127,7 +127,7 @@ async function tryOpenRouter(system, messages) {
     },
     body: JSON.stringify({
       model: 'meta-llama/llama-3.3-70b-instruct:free',
-      max_tokens: 4000,
+      max_tokens: 2000,
       messages: [{ role: 'system', content: system }, ...messages],
     }),
   });
@@ -147,7 +147,7 @@ async function tryXai(system, messages) {
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
     body: JSON.stringify({
       model: 'grok-3-mini',
-      max_tokens: 4000,
+      max_tokens: 2000,
       messages: [{ role: 'system', content: system }, ...messages],
     }),
   });
