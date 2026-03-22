@@ -1,0 +1,9 @@
+{
+  "name": "zicao-dev",
+  "version": "1.0.0",
+  "description": "zicao.dev — IA de programação com motor cascata Claude-first",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
